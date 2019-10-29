@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DCCFED31-479B-438A-ADEE-43F096E67639}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{430800E3-36B5-40D4-B1A0-1D152B60485E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DomainModeling.Console", "src\DomainModeling.Console\DomainModeling.Console.fsproj", "{7D21487F-012D-4247-AD83-FB5769DDA857}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DomainModeling.Domain", "src\DomainModeling.Domain\DomainModeling.Domain.fsproj", "{0DB5FA8A-0A54-4FA7-A459-6B77CA4C2D9B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7D21487F-012D-4247-AD83-FB5769DDA857} = {DCCFED31-479B-438A-ADEE-43F096E67639}
+		{0DB5FA8A-0A54-4FA7-A459-6B77CA4C2D9B} = {DCCFED31-479B-438A-ADEE-43F096E67639}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D21487F-012D-4247-AD83-FB5769DDA857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D21487F-012D-4247-AD83-FB5769DDA857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D21487F-012D-4247-AD83-FB5769DDA857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D21487F-012D-4247-AD83-FB5769DDA857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB5FA8A-0A54-4FA7-A459-6B77CA4C2D9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB5FA8A-0A54-4FA7-A459-6B77CA4C2D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB5FA8A-0A54-4FA7-A459-6B77CA4C2D9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB5FA8A-0A54-4FA7-A459-6B77CA4C2D9B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
