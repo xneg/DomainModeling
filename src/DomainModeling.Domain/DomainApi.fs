@@ -7,13 +7,14 @@ type SomeType = SomeType of int
 
 type UnvalidatedOrder = {
     OrderId: string
-    CustomerInfo: UnvalidatedCustomer
+    CustomerInfo: UnvalidatedCustomerInfo
     ShippingAddress: UnvalidatedAddress
 }
 
-type UnvalidatedCustomer = {
-    Name: string
-    Email: string
+type UnvalidatedCustomerInfo = {
+    FirstName: string
+    LastName: string
+    EmailAddress: string
 }
 
 type UnvalidatedAddress = Undefined
