@@ -9,6 +9,7 @@ type UnvalidatedOrder = {
     OrderId: string
     CustomerInfo: UnvalidatedCustomerInfo
     ShippingAddress: UnvalidatedAddress
+    BillingAddress: UnvalidatedAddress
 }
 
 type UnvalidatedCustomerInfo = {
@@ -17,7 +18,14 @@ type UnvalidatedCustomerInfo = {
     EmailAddress: string
 }
 
-type UnvalidatedAddress = Undefined
+type UnvalidatedAddress = {
+    AddressLine1: string
+    AddressLine2: string
+    AddressLine3: string
+    AddressLine4: string
+    City: string
+    ZipCode: string
+}
 
 type Command<'data> = {
     Data: 'data

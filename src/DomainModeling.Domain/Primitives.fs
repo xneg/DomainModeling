@@ -19,6 +19,8 @@ type OrderQuantity =
 type OrderId = private OrderId of string
 type EmailAddress = private EmailAddress of string
 
+type ZipCode = private ZipCode of string
+
 module OrderId =
     let create str =
         if String.IsNullOrEmpty(str) then
@@ -126,3 +128,14 @@ module EmailAddress =
     let create fieldName str = 
         let pattern = ".+@.+" // anything separated by an "@"
         ConstrainedType.createLike fieldName EmailAddress pattern str
+        
+module ZipCode =
+
+    /// Return the string value inside a ZipCode
+    let value (ZipCode str) = str
+
+    /// Create a ZipCode from a string
+    /// Return Error if input is null, empty, or doesn't have 5 digits
+    let create fieldName str = 
+        let pattern = "\d{5}"
+        ConstrainedType.createLike fieldName ZipCode pattern str

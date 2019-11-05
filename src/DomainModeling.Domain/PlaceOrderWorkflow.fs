@@ -22,7 +22,14 @@ type PersonalName = {
     LastName : String50
 }
 
-type Address = Undefined
+type Address = {
+    AddressLine1 : String50
+    AddressLine2 : String50 option
+    AddressLine3 : String50 option
+    AddressLine4 : String50 option
+    City : String50
+    ZipCode : ZipCode
+}
 
 type PricedOrderLine = Undefined
 type PricedOrder = Undefined
