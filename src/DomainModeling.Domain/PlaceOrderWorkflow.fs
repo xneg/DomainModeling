@@ -2,7 +2,11 @@ namespace rec DomainModeling.Domain.PlaceOrderWorkflow
 open DomainModeling.Domain.Api
 open DomainModeling.Domain.Primitives
 
-type ValidatedOrderLine = Undefined
+type ValidatedOrderLine = {
+    OrderLineId: OrderLineId
+    ProductCode: ProductCode
+    Quantity: OrderQuantity
+}
 
 type ValidatedOrder = {
     OrderId: OrderId

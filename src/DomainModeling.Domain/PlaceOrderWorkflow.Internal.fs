@@ -2,6 +2,7 @@ module internal DomainModeling.Domain.PlaceOrderWorkflow.Internal
 
 open DomainModeling.Domain.Api
 open DomainModeling.Domain.Primitives
+open DomainModeling.Domain.Primitives
 
 type CheckProductCodeExists = ProductCode -> bool
 
@@ -69,7 +70,27 @@ let toAddress (checkAddressExists: CheckAddressExists) unvalidatedAddress =
     }
     address
 
-let toValidatedOrderLine checkProductCodeExists (unvalidatedOrderLine: UnvalidatedOrder)
+let toProductCode (checkProductCodeExists: CheckProductCodeExists) productCode : ProductCode =
+    failwith "Not implemented"
+
+let toOrderQuantity productCode quantity =
+    match productCode with
+    | Widget _ ->
+        quantity |> int |> UnitQuantity.create "Quantity" |> OrderQuantity.Unit
+    | Gizmo _ ->
+        quantity |> decimal |> KilogramQuantity.create "Quantity" |> OrderQuantity.Kilos
+
+let toValidatedOrderLine checkProductCodeExists unvalidatedOrderLine =
+    let orderLineId = unvalidatedOrderLine.OrderLineId |> OrderLineId.create "OrderLineId"
+    let productCode = unvalidatedOrderLine.ProductCode |> toProductCode checkProductCodeExists
+    let quantity = unvalidatedOrderLine.Quantity |> toOrderQuantity productCode
+    
+    let validatedOrderLine : ValidatedOrderLine = {
+        OrderLineId = orderLineId
+        ProductCode = productCode
+        Quantity = quantity
+    }
+    validatedOrderLine
 
 let validateOrder: ValidateOrder =
     fun checkProductCodeExists checkAddressExists unvalidatedOrder ->
@@ -78,16 +99,11 @@ let validateOrder: ValidateOrder =
         let customerInfo = unvalidatedOrder.CustomerInfo |> toCustomerInfo
         let shippingAddress = unvalidatedOrder.ShippingAddress |> toAddress checkAddressExists
         let billingAddress = unvalidatedOrder.BillingAddress |> toAddress checkAddressExists
-        
+        let orderLines = unvalidatedOrder.OrderLines |> List.map (toValidatedOrderLine checkProductCodeExists)
         {
             OrderId = orderId
             CustomerInfo = customerInfo
             ShippingAddress = shippingAddress
             BillingAddress = billingAddress
+            OrderLines = orderLines
         }     
-
-//    OrderId: OrderId
-//    CustomerInfo: CustomerInfo
-//    ShippingAddress: Address
-//    BillingAddress: Address
-//    OrderLines: ValidatedOrderLine list

@@ -10,8 +10,8 @@ type ProductCode =
     | Widget of WidgetCode
     | Gizmo of GizmoCode
     
-type UnitQuantity = UnitQuantity of int
-type KilogramQuantity = KilogramQuantity of decimal
+type UnitQuantity = private UnitQuantity of int
+type KilogramQuantity = private KilogramQuantity of decimal
 type OrderQuantity =
     | Unit of UnitQuantity
     | Kilos of KilogramQuantity
@@ -20,6 +20,8 @@ type OrderId = private OrderId of string
 type EmailAddress = private EmailAddress of string
 
 type ZipCode = private ZipCode of string
+
+type OrderLineId = private OrderLineId of string
 
 module OrderId =
     let create str =
@@ -71,27 +73,47 @@ module ConstrainedType =
 
     /// Create a constrained integer using the constructor provided
     /// Return Error if input is less than minVal or more than maxVal
+//    let createInt fieldName ctor minVal maxVal i = 
+//        if i < minVal then
+//            let msg = sprintf "%s: Must not be less than %i" fieldName minVal
+//            Error msg
+//        elif i > maxVal then
+//            let msg = sprintf "%s: Must not be greater than %i" fieldName maxVal
+//            Error msg
+//        else
+//            Ok (ctor i)
+    
     let createInt fieldName ctor minVal maxVal i = 
         if i < minVal then
             let msg = sprintf "%s: Must not be less than %i" fieldName minVal
-            Error msg
+            failwith msg
         elif i > maxVal then
             let msg = sprintf "%s: Must not be greater than %i" fieldName maxVal
-            Error msg
+            failwith msg
         else
-            Ok (ctor i)
+            ctor i
 
     /// Create a constrained decimal using the constructor provided
     /// Return Error if input is less than minVal or more than maxVal
+//    let createDecimal fieldName ctor minVal maxVal i = 
+//        if i < minVal then
+//            let msg = sprintf "%s: Must not be less than %M" fieldName minVal
+//            Error msg
+//        elif i > maxVal then
+//            let msg = sprintf "%s: Must not be greater than %M" fieldName maxVal
+//            Error msg
+//        else
+//            Ok (ctor i)
+        
     let createDecimal fieldName ctor minVal maxVal i = 
         if i < minVal then
             let msg = sprintf "%s: Must not be less than %M" fieldName minVal
-            Error msg
+            failwith msg
         elif i > maxVal then
             let msg = sprintf "%s: Must not be greater than %M" fieldName maxVal
-            Error msg
+            failwith msg
         else
-            Ok (ctor i)
+            ctor i
 
     /// Create a constrained string using the constructor provided
     /// Return Error if input is null. empty, or does not match the regex pattern
@@ -139,3 +161,33 @@ module ZipCode =
     let create fieldName str = 
         let pattern = "\d{5}"
         ConstrainedType.createLike fieldName ZipCode pattern str
+        
+module OrderLineId =
+
+    /// Return the string value inside an OrderLineId 
+    let value (OrderLineId str) = str
+
+    /// Create an OrderLineId from a string
+    /// Return Error if input is null, empty, or length > 50
+    let create fieldName str = 
+        ConstrainedType.createString fieldName OrderLineId 50 str
+        
+module UnitQuantity  =
+
+    /// Return the value inside a UnitQuantity 
+    let value (UnitQuantity v) = v
+
+    /// Create a UnitQuantity from a int
+    /// Return Error if input is not an integer between 1 and 1000 
+    let create fieldName v = 
+        ConstrainedType.createInt fieldName UnitQuantity 1 1000 v
+        
+module KilogramQuantity =
+
+    /// Return the value inside a KilogramQuantity 
+    let value (KilogramQuantity v) = v
+
+    /// Create a KilogramQuantity from a decimal.
+    /// Return Error if input is not a decimal between 0.05 and 100.00 
+    let create fieldName v = 
+        ConstrainedType.createDecimal fieldName KilogramQuantity 0.5M 100M v
