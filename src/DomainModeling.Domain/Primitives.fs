@@ -23,6 +23,10 @@ type ZipCode = private ZipCode of string
 
 type OrderLineId = private OrderLineId of string
 
+type Price = private Price of decimal
+
+type BillingAmount = private BillingAmount of decimal
+
 module OrderId =
     let create str =
         if String.IsNullOrEmpty(str) then
@@ -191,3 +195,114 @@ module KilogramQuantity =
     /// Return Error if input is not a decimal between 0.05 and 100.00 
     let create fieldName v = 
         ConstrainedType.createDecimal fieldName KilogramQuantity 0.5M 100M v
+
+module WidgetCode =
+
+    /// Return the string value inside a WidgetCode 
+    let value (WidgetCode code) = code
+
+    /// Create an WidgetCode from a string
+    /// Return Error if input is null. empty, or not matching pattern
+    let create fieldName code = 
+        // The codes for Widgets start with a "W" and then four digits
+        let pattern = "W\d{4}"
+        ConstrainedType.createLike fieldName WidgetCode pattern code 
+
+module GizmoCode =
+
+    /// Return the string value inside a GizmoCode
+    let value (GizmoCode code) = code
+
+    /// Create an GizmoCode from a string
+    /// Return Error if input is null, empty, or not matching pattern
+    let create fieldName code = 
+        // The codes for Gizmos start with a "G" and then three digits. 
+        let pattern = "G\d{3}"
+        ConstrainedType.createLike fieldName GizmoCode pattern code 
+        
+module ProductCode =
+
+    /// Return the string value inside a ProductCode 
+    let value productCode = 
+        match productCode with
+        | Widget (WidgetCode wc) -> wc
+        | Gizmo (GizmoCode gc) -> gc
+
+    /// Create an ProductCode from a string
+    /// Return Error if input is null, empty, or not matching pattern
+    let create fieldName code = 
+        if String.IsNullOrEmpty(code) then
+            let msg = sprintf "%s: Must not be null or empty" fieldName
+            failwith msg
+            //Error msg
+        else if code.StartsWith("W") then
+            WidgetCode.create fieldName code  |> Widget
+            //|> Result.map Widget
+        else if code.StartsWith("G") then
+            GizmoCode.create fieldName code |> Gizmo
+            //|> Result.map Gizmo
+        else 
+            let msg = sprintf "%s: Format not recognized '%s'" fieldName code
+            failwith msg
+            //Error msg
+            
+module Price =
+
+    /// Return the value inside a Price 
+    let value (Price v) = v
+
+    /// Create a Price from a decimal.
+    /// Return Error if input is not a decimal between 0.0 and 1000.00 
+    let create v = 
+        ConstrainedType.createDecimal "Price" Price 0.0M 1000M v
+
+    /// Create a Price from a decimal.
+    /// Throw an exception if out of bounds. This should only be used if you know the value is valid.
+//    let unsafeCreate v = 
+//        create v 
+//        |> function
+//            | Ok price -> 
+//                price
+//            | Error err -> 
+//                failwithf "Not expecting Price to be out of bounds: %s" err
+
+    /// Multiply a Price by a decimal qty.
+    /// Return Error if new price is out of bounds.
+    let multiply qty (Price p) = 
+        create (qty * p)
+        
+module BillingAmount =
+
+    /// Return the value inside a BillingAmount
+    let value (BillingAmount v) = v
+
+    /// Create a BillingAmount from a decimal.
+    /// Return Error if input is not a decimal between 0.0 and 10000.00 
+    let create v = 
+        ConstrainedType.createDecimal "BillingAmount" BillingAmount 0.0M 10000M v
+
+    /// Sum a list of prices to make a billing amount
+    /// Return Error if total is out of bounds
+    let sumPrices prices =
+        let total = prices |> List.map Price.value |> List.sum
+        create total
+
+module OrderQuantity  =
+
+    /// Return the value inside a OrderQuantity  
+    let value qty = 
+        match qty with
+        | Unit uq -> 
+            uq |> UnitQuantity.value |> decimal
+        | Kilos kq -> 
+            kq |> KilogramQuantity.value 
+
+    /// Create a OrderQuantity from a productCode and quantity  
+    let create fieldName productCode quantity  = 
+        match productCode with
+        | Widget _ -> 
+            UnitQuantity.create fieldName (int quantity) // convert float to int 
+            |> OrderQuantity.Unit             // lift to OrderQuantity type
+        | Gizmo _ -> 
+            KilogramQuantity.create fieldName quantity 
+            |> OrderQuantity.Kilos         // lift to OrderQuantity type

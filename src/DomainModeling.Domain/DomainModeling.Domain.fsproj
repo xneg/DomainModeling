@@ -9,7 +9,6 @@
         <Compile Include="Primitives.fs" />
         <Compile Include="DomainApi.fs" />
         <Compile Include="PlaceOrderWorkflow.fs" />
-        <Compile Include="PlaceOrderWorkflow.Internal.fs" />
     </ItemGroup>
 
 </Project>
