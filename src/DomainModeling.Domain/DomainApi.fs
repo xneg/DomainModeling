@@ -45,7 +45,10 @@ type PlaceOrderCommand = Command<UnvalidatedOrder>
 
 type OrderPlaced = Undefined
 type BillableOrderPlaced = Undefined
-type OrderAcknowledgmentSent = Undefined
+type OrderAcknowledgmentSent = {
+    OrderId : OrderId
+    EmailAddress : EmailAddress 
+}
 
 type PlaceOrderEvent =
     | OrderPlaced of OrderPlaced

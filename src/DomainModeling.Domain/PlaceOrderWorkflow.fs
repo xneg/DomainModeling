@@ -4,44 +4,57 @@ open DomainModeling.Domain.Api
 open DomainModeling.Domain.Primitives
 open DomainModeling.Domain.Utils
 
-type CheckProductCodeExists = ProductCode -> bool
-
-type AddressValidationError = Undefined
+// Validation
 
 type CheckedAddress = CheckedAddress of UnvalidatedAddress
 
-//type CheckAddressExists = UnvalidatedAddress -> AsyncResult<CheckedAddress, AddressValidationError>
-type CheckAddressExists = UnvalidatedAddress -> CheckedAddress
 type ValidationError = Undefined
-
-//type ValidateOrder =
-//    CheckProductCodeExists
-//        -> CheckAddressExists
-//        -> UnvalidatedOrder
-//        -> AsyncResult<ValidatedOrder, ValidationError list>
+type AddressValidationError = Undefined
 
 type ValidateOrder =
     CheckProductCodeExists
         -> CheckAddressExists
         -> UnvalidatedOrder
-        -> ValidatedOrder
+        -> ValidatedOrder // AsyncResult<ValidatedOrder, ValidationError list>
+and
+    CheckProductCodeExists = ProductCode -> bool
+and
+    CheckAddressExists = UnvalidatedAddress -> CheckedAddress //AsyncResult<CheckedAddress, AddressValidationError>
 
-type GetProductPrice = ProductCode -> Price
+// Pricing
 
 type PricingError = Undefined
-
-type PriceError =
-    GetProductPrice
-        -> ValidatedOrder
-        -> Result<PricedOrder, PricingError>
         
- 
 type PriceOrder =
     GetProductPrice
         -> ValidatedOrder
-        -> PricedOrder
-       
+        -> PricedOrder //Result<PricedOrder, PricingError>
+and
+    GetProductPrice = ProductCode -> Price
 
+//Acknowledgment
+        
+type HtmlString = HtmlString of string
+
+type OrderAcknowledgment = {
+    EmailAddress: EmailAddress
+    Letter: HtmlString
+}
+type SentResult = Sent | NotSent
+
+type AcknowledgeOrder =
+    CreateOrderAcknowledgmentLetter
+        -> SendOrderAcknowledgment
+        -> PricedOrder
+        -> OrderAcknowledgmentSent option
+and
+    CreateOrderAcknowledgmentLetter = PricedOrder -> HtmlString
+and
+    SendOrderAcknowledgment = OrderAcknowledgment -> SentResult
+        
+// implementation
+
+// Validation
 let toCustomerInfo (customer:UnvalidatedCustomerInfo) : CustomerInfo =
     let firstName = customer.FirstName |> String50.create "FirstName"
     let lastName = customer.LastName |> String50.create "LastName"
@@ -74,7 +87,6 @@ let toAddress (checkAddressExists: CheckAddressExists) unvalidatedAddress =
         ZipCode = zipCode
     }
     address
-
 
 let toProductCode (checkProductCodeExists: CheckProductCodeExists) productCode =
     let checkProduct =
@@ -120,7 +132,7 @@ let validateOrder: ValidateOrder =
             Lines = orderLines
         }
         
-// ==========================================================================
+// Pricing
 
 let toPricedOrderLine getProductPrice (line: ValidatedOrderLine) =
     let qty = line.Quantity |> OrderQuantity.value
@@ -147,3 +159,22 @@ let priceOrder: PriceOrder =
             Lines = lines
             AmountToBill = amountToBill
         }
+
+// Acknowledgment
+
+let acknowledgeOrder: AcknowledgeOrder =
+    fun createOrderAcknowledgmentLetter sendOrderAcknowledgment pricedOrder ->
+        let letter = createOrderAcknowledgmentLetter pricedOrder
+        let acknowledgment = {
+            EmailAddress = pricedOrder.CustomerInfo.EmailAddress
+            Letter = letter
+        }
+        
+        match sendOrderAcknowledgment acknowledgment with
+        | Sent ->
+            let event = {
+                EmailAddress = pricedOrder.CustomerInfo.EmailAddress
+                OrderId = pricedOrder.OrderId
+            }
+            Some event
+        | NotSent -> None
