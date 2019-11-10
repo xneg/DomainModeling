@@ -43,8 +43,12 @@ type Command<'data> = {
 
 type PlaceOrderCommand = Command<UnvalidatedOrder>
 
-type OrderPlaced = Undefined
-type BillableOrderPlaced = Undefined
+type OrderPlaced = PricedOrder
+type BillableOrderPlaced = {
+    OrderId: OrderId
+    BillingAddress: Address
+    AmountToBill: BillingAmount
+}
 type OrderAcknowledgmentSent = {
     OrderId : OrderId
     EmailAddress : EmailAddress 

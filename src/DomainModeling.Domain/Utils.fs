@@ -7,3 +7,8 @@ let predicateToPassthru errorMsg f x =
         x
     else
         failwith errorMsg
+        
+let listOfOption opt =
+    match opt with
+    | Some x -> [x]
+    | None -> []

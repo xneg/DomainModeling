@@ -32,7 +32,7 @@ type PriceOrder =
 and
     GetProductPrice = ProductCode -> Price
 
-//Acknowledgment
+// Acknowledgment
         
 type HtmlString = HtmlString of string
 
@@ -52,6 +52,10 @@ and
 and
     SendOrderAcknowledgment = OrderAcknowledgment -> SentResult
         
+// Create events
+
+type CreateEvents = PricedOrder -> OrderAcknowledgmentSent option -> PlaceOrderEvent list
+
 // implementation
 
 // Validation
@@ -178,3 +182,28 @@ let acknowledgeOrder: AcknowledgeOrder =
             }
             Some event
         | NotSent -> None
+        
+// Create events
+
+let createBillingEvent placedOrder =
+    let billingAmount = placedOrder.AmountToBill |> BillingAmount.value
+    if billingAmount > 0M then
+        let order = {
+            OrderId = placedOrder.OrderId
+            BillingAddress = placedOrder.BillingAddress
+            AmountToBill = placedOrder.AmountToBill
+        }
+        Some order
+    else
+        None
+        
+let createEvents: CreateEvents =
+    fun pricedOrder acknowledgmentEventOpt ->
+        let events1 = pricedOrder |> PlaceOrderEvent.OrderPlaced |> List.singleton
+        let events2 = acknowledgmentEventOpt |> Option.map PlaceOrderEvent.AcknowledgementSent |> listOfOption
+        let events3 = pricedOrder |> createBillingEvent |> Option.map PlaceOrderEvent.BillableOrderPlaced |> listOfOption
+        [
+            yield! events1
+            yield! events2
+            yield! events3
+        ]
