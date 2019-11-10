@@ -1,11 +1,9 @@
 ﻿namespace rec DomainModeling.Domain.Api
 
-open System
 open DomainModeling.Domain.Utils
 open DomainModeling.Domain.Primitives
 
-type SomeType = SomeType of int
-
+// input
 type UnvalidatedOrder = {
     OrderId: string
     CustomerInfo: UnvalidatedCustomerInfo
@@ -13,14 +11,12 @@ type UnvalidatedOrder = {
     BillingAddress: UnvalidatedAddress
     OrderLines: UnvalidatedOrderLine list
 }
-
-type UnvalidatedCustomerInfo = {
+and UnvalidatedCustomerInfo = {
     FirstName: string
     LastName: string
     EmailAddress: string
 }
-
-type UnvalidatedAddress = {
+and UnvalidatedAddress = {
     AddressLine1: string
     AddressLine2: string
     AddressLine3: string
@@ -28,46 +24,36 @@ type UnvalidatedAddress = {
     City: string
     ZipCode: string
 }
-
-type UnvalidatedOrderLine = {
+and UnvalidatedOrderLine = {
     OrderLineId: string
     ProductCode: string
     Quantity: string
 }
 
-type Command<'data> = {
-    Data: 'data
-    Timestamp: DateTime
-    UserId: string
-}
-
 type PlaceOrderCommand = Command<UnvalidatedOrder>
 
-type OrderPlaced = PricedOrder
-type BillableOrderPlaced = {
-    OrderId: OrderId
-    BillingAddress: Address
-    AmountToBill: BillingAmount
-}
-type OrderAcknowledgmentSent = {
-    OrderId : OrderId
-    EmailAddress : EmailAddress 
-}
-
+// output
 type PlaceOrderEvent =
     | OrderPlaced of OrderPlaced
     | BillableOrderPlaced of BillableOrderPlaced
     | AcknowledgementSent of OrderAcknowledgmentSent
-    
+and
+    OrderPlaced = PricedOrder
+and
+    BillableOrderPlaced = {
+    OrderId: OrderId
+    BillingAddress: Address
+    AmountToBill: BillingAmount
+}
+and
+    OrderAcknowledgmentSent = {
+    OrderId : OrderId
+    EmailAddress : EmailAddress 
+}
+
 type PlaceOrderError = Undefined
 
 type PlaceOrderWorkflow = PlaceOrderCommand -> AsyncResult<PlaceOrderEvent list, PlaceOrderError>
-
-type ValidatedOrderLine = {
-    OrderLineId: OrderLineId
-    ProductCode: ProductCode
-    Quantity: OrderQuantity
-}
 
 type ValidatedOrder = {
     OrderId: OrderId
@@ -76,18 +62,15 @@ type ValidatedOrder = {
     BillingAddress: Address
     Lines: ValidatedOrderLine list
 }
-
-type CustomerInfo = {
+and CustomerInfo = {
     Name: PersonalName
     EmailAddress: EmailAddress
 }
-
-type PersonalName = {
+and PersonalName = {
     FirstName : String50
     LastName : String50
 }
-
-type Address = {
+and Address = {
     AddressLine1 : String50
     AddressLine2 : String50 option
     AddressLine3 : String50 option
@@ -95,13 +78,12 @@ type Address = {
     City : String50
     ZipCode : ZipCode
 }
+and ValidatedOrderLine = {
+    OrderLineId: OrderLineId
+    ProductCode: ProductCode
+    Quantity: OrderQuantity
+}
 
-type PricedOrderLine =  {
-    OrderLineId : OrderLineId 
-    ProductCode : ProductCode 
-    Quantity : OrderQuantity
-    LinePrice : Price
-    }
 type PricedOrder = {
     OrderId: OrderId
     CustomerInfo: CustomerInfo
@@ -109,6 +91,12 @@ type PricedOrder = {
     BillingAddress: Address
     Lines: PricedOrderLine list
     AmountToBill: BillingAmount
+}
+and PricedOrderLine =  {
+    OrderLineId : OrderLineId 
+    ProductCode : ProductCode 
+    Quantity : OrderQuantity
+    LinePrice : Price
 }
 
 type Order =
