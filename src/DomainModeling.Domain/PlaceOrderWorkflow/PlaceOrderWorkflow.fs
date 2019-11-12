@@ -1,5 +1,6 @@
 module DomainModeling.Domain.PlaceOrderWorkflow
 
+open DomainModeling.Domain.Result
 open DomainModeling.Domain.Api
 open DomainModeling.Domain.PlaceOrderWorkflow.Steps
 
@@ -18,13 +19,19 @@ let placeOrder
     sendOrderAcknowledgment
     : PlaceOrderWorkflow =
     fun unvalidatedOrder ->
-        let validatedOrder =
-            unvalidatedOrder.Data //??
-            |> validateOrder checkOrderExists checkAddressExists
-        let pricedOrder = validatedOrder |> priceOrder getProductPrice
-        let acknowledgmentOption =
-            pricedOrder
-            |> acknowledgeOrder createOrderAcknowledgmentLetter sendOrderAcknowledgment
-        let events = createEvents pricedOrder acknowledgmentOption
-        events
-
+        result {
+            let! validatedOrder =
+                unvalidatedOrder.Data // ??
+                |> validateOrder checkOrderExists checkAddressExists
+                |> Result.mapError PlaceOrderError.Validation
+            let! pricedOrder =
+                validatedOrder
+                |> priceOrder getProductPrice
+                |> Result.mapError PlaceOrderError.Pricing
+            let acknowledgmentOption =
+                pricedOrder
+                |> acknowledgeOrder createOrderAcknowledgmentLetter sendOrderAcknowledgment
+            let events = createEvents pricedOrder acknowledgmentOption
+            return events
+        }
+        

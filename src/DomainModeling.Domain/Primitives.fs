@@ -30,11 +30,11 @@ type BillingAmount = private BillingAmount of decimal
 module OrderId =
     let create str =
         if String.IsNullOrEmpty(str) then
-            failwith "OrderId must not be null or empty"
+            Error "OrderId must not be null or empty"
         elif str.Length > 50 then
-            failwith "OrderId must not be more then 50 chars"
+            Error "OrderId must not be more then 50 chars"
         else
-            OrderId str
+            Ok(OrderId str)
     
     let value (OrderId str) = str
 

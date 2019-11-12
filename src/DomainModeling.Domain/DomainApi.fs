@@ -51,9 +51,16 @@ and
     EmailAddress : EmailAddress 
 }
 
-type PlaceOrderError = Undefined
+type PlaceOrderError =
+    | Validation of ValidationError
+    | Pricing of PricingError
+and
+    ValidationError = ValidationError of string
+and
+    PricingError = Undefined
 
-type PlaceOrderWorkflow = PlaceOrderCommand -> PlaceOrderEvent list//AsyncResult<PlaceOrderEvent list, PlaceOrderError>
+
+type PlaceOrderWorkflow = PlaceOrderCommand -> Result<PlaceOrderEvent list, PlaceOrderError> //AsyncResult<PlaceOrderEvent list, PlaceOrderError>
 
 type ValidatedOrder = {
     OrderId: OrderId

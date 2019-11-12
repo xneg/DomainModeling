@@ -6,6 +6,7 @@
 
     <ItemGroup>
         <Compile Include="Utils.fs" />
+        <Compile Include="Result.fs" />
         <Compile Include="Primitives.fs" />
         <Compile Include="DomainApi.fs" />
         <Compile Include="PlaceOrderWorkflow\PlaceOrderWorkflow.Steps.fs" />
