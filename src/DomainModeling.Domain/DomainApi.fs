@@ -53,7 +53,7 @@ and
 
 type PlaceOrderError = Undefined
 
-type PlaceOrderWorkflow = PlaceOrderCommand -> AsyncResult<PlaceOrderEvent list, PlaceOrderError>
+type PlaceOrderWorkflow = PlaceOrderCommand -> PlaceOrderEvent list//AsyncResult<PlaceOrderEvent list, PlaceOrderError>
 
 type ValidatedOrder = {
     OrderId: OrderId
@@ -99,6 +99,7 @@ and PricedOrderLine =  {
     LinePrice : Price
 }
 
+// пока не очень ясно, для чего он здесь
 type Order =
     | Unvalidated of UnvalidatedOrder
     | Validated of ValidatedOrder
