@@ -42,25 +42,15 @@ module ConstrainedType =
 
     /// Create a constrained string using the constructor provided
     /// Return Error if input is null, empty, or length > maxLen
-//    let createString fieldName ctor maxLen str = 
-//        if String.IsNullOrEmpty(str) then
-//            let msg = sprintf "%s must not be null or empty" fieldName 
-//            Error msg
-//        elif str.Length > maxLen then
-//            let msg = sprintf "%s must not be more than %i chars" fieldName maxLen 
-//            Error msg 
-//        else
-//            Ok (ctor str)
-            
     let createString fieldName ctor maxLen str = 
         if String.IsNullOrEmpty(str) then
             let msg = sprintf "%s must not be null or empty" fieldName 
-            failwith msg
+            Error msg
         elif str.Length > maxLen then
             let msg = sprintf "%s must not be more than %i chars" fieldName maxLen 
-            failwith msg
+            Error msg 
         else
-            ctor str
+            Ok (ctor str)
 
     /// Create a optional constrained string using the constructor provided
     /// Return None if input is null, empty. 
@@ -121,25 +111,16 @@ module ConstrainedType =
 
     /// Create a constrained string using the constructor provided
     /// Return Error if input is null. empty, or does not match the regex pattern
-//    let createLike fieldName  ctor pattern str = 
-//        if String.IsNullOrEmpty(str) then
-//            let msg = sprintf "%s: Must not be null or empty" fieldName 
-//            Error msg
-//        elif System.Text.RegularExpressions.Regex.IsMatch(str,pattern) then
-//            Ok (ctor str)
-//        else
-//            let msg = sprintf "%s: '%s' must match the pattern '%s'" fieldName str pattern
-//            Error msg
-            
     let createLike fieldName  ctor pattern str = 
         if String.IsNullOrEmpty(str) then
             let msg = sprintf "%s: Must not be null or empty" fieldName 
-            failwith msg
+            Error msg
         elif System.Text.RegularExpressions.Regex.IsMatch(str,pattern) then
-            ctor str
+            Ok (ctor str)
         else
             let msg = sprintf "%s: '%s' must match the pattern '%s'" fieldName str pattern
-            failwith msg
+            Error msg
+
     
 module String50 =
     let value (String50 str) = str
@@ -233,18 +214,14 @@ module ProductCode =
     let create fieldName code = 
         if String.IsNullOrEmpty(code) then
             let msg = sprintf "%s: Must not be null or empty" fieldName
-            failwith msg
-            //Error msg
+            Error msg
         else if code.StartsWith("W") then
-            WidgetCode.create fieldName code  |> Widget
-            //|> Result.map Widget
+            WidgetCode.create fieldName code |> Result.map Widget
         else if code.StartsWith("G") then
-            GizmoCode.create fieldName code |> Gizmo
-            //|> Result.map Gizmo
+            GizmoCode.create fieldName code |> Result.map Gizmo
         else 
             let msg = sprintf "%s: Format not recognized '%s'" fieldName code
-            failwith msg
-            //Error msg
+            Error msg
             
 module Price =
 
