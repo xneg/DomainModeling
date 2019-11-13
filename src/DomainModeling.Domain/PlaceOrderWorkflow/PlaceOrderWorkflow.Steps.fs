@@ -72,7 +72,7 @@ let toCustomerInfo (customer:UnvalidatedCustomerInfo) =
         return customerInfo
     }
 
-let toAddress2 (CheckedAddress unvalidatedAddress) =
+let toAddress (CheckedAddress unvalidatedAddress) =
     result {
         let! addressLine1 = 
             unvalidatedAddress.AddressLine1 
@@ -109,26 +109,26 @@ let toAddress2 (CheckedAddress unvalidatedAddress) =
         return address
     }
 
-let toAddress (checkAddressExists: CheckAddressExists) unvalidatedAddress =
-    result {
-        let! checkedAddress = checkAddressExists unvalidatedAddress
-        let addressLine1 = checkedAddress.AddressLine1 |> String50.create "AddressLine1"
-        let addressLine2 = checkedAddress.AddressLine2 |> String50.create "AddressLine2"
-        let addressLine3 = checkedAddress.AddressLine3 |> String50.create "AddressLine3"
-        let addressLine4 = checkedAddress.AddressLine4 |> String50.create "AddressLine4"
-
-        let city = checkedAddress.City |> String50.create "City"
-        let zipCode = checkedAddress.ZipCode |> ZipCode.create "ZipCode"
-        let address: Address = {
-            AddressLine1 = addressLine1
-            AddressLine2 = Some(addressLine2)
-            AddressLine3 = Some(addressLine3)
-            AddressLine4 = Some(addressLine4)
-            City = city
-            ZipCode = zipCode
-        }
-        return address
-    }
+//let toAddress (checkAddressExists: CheckAddressExists) unvalidatedAddress =
+//    result {
+//        let! checkedAddress = checkAddressExists unvalidatedAddress
+//        let addressLine1 = checkedAddress.AddressLine1 |> String50.create "AddressLine1"
+//        let addressLine2 = checkedAddress.AddressLine2 |> String50.create "AddressLine2"
+//        let addressLine3 = checkedAddress.AddressLine3 |> String50.create "AddressLine3"
+//        let addressLine4 = checkedAddress.AddressLine4 |> String50.create "AddressLine4"
+//
+//        let city = checkedAddress.City |> String50.create "City"
+//        let zipCode = checkedAddress.ZipCode |> ZipCode.create "ZipCode"
+//        let address: Address = {
+//            AddressLine1 = addressLine1
+//            AddressLine2 = Some(addressLine2)
+//            AddressLine3 = Some(addressLine3)
+//            AddressLine4 = Some(addressLine4)
+//            City = city
+//            ZipCode = zipCode
+//        }
+//        return address
+//    }
 //    failwith "Undefined"
 
 //    let (CheckedAddress checkedAddress) = checkedAddress
@@ -186,10 +186,15 @@ let validateOrder =
         result {
             let! orderId = unvalidatedOrder.OrderId |> OrderId.create |> Result.mapError ValidationError
             let! customerInfo = unvalidatedOrder.CustomerInfo |> toCustomerInfo
-            let! shippingAddress = unvalidatedOrder.ShippingAddress
-                                   |> toAddress checkAddressExists |> Result.mapError ValidationError
-            let! billingAddress = unvalidatedOrder.BillingAddress
-                                  |> toAddress checkAddressExists |> Result.mapError ValidationError
+            let! shippingAddress =
+                unvalidatedOrder.ShippingAddress
+                |> checkAddressExists
+                |> toAddress
+            let! billingAddress =
+                unvalidatedOrder.BillingAddress
+                |> checkAddressExists
+                |> toAddress
+            
             let orderLines = unvalidatedOrder.OrderLines |> List.map (toValidatedOrderLine checkProductCodeExists)
             let validatedOrder = {
                 OrderId = orderId
