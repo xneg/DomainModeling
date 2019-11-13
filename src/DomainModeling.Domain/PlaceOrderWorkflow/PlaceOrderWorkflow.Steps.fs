@@ -7,11 +7,9 @@ open DomainModeling.Domain.Result
 
 // Validation
 
-type CheckedAddress = CheckedAddress of UnvalidatedAddress
-
 type AddressValidationError =
-    | InvalidFormat of string
-    | AddressNotFound of string
+    | InvalidFormat
+    | AddressNotFound
 
 type ValidateOrder =
     CheckProductCodeExists
@@ -72,6 +70,14 @@ let toCustomerInfo (customer:UnvalidatedCustomerInfo) =
         return customerInfo
     }
 
+let toCheckedAddress checkAddressExists input =
+    input |>
+    checkAddressExists
+    |> Result.mapError (fun addrError ->
+        match addrError with
+        | AddressNotFound -> ValidationError "Address not found"
+        | InvalidFormat -> ValidationError "Address has bad format")
+
 let toAddress (CheckedAddress unvalidatedAddress) =
     result {
         let! addressLine1 = 
@@ -109,47 +115,6 @@ let toAddress (CheckedAddress unvalidatedAddress) =
         return address
     }
 
-//let toAddress (checkAddressExists: CheckAddressExists) unvalidatedAddress =
-//    result {
-//        let! checkedAddress = checkAddressExists unvalidatedAddress
-//        let addressLine1 = checkedAddress.AddressLine1 |> String50.create "AddressLine1"
-//        let addressLine2 = checkedAddress.AddressLine2 |> String50.create "AddressLine2"
-//        let addressLine3 = checkedAddress.AddressLine3 |> String50.create "AddressLine3"
-//        let addressLine4 = checkedAddress.AddressLine4 |> String50.create "AddressLine4"
-//
-//        let city = checkedAddress.City |> String50.create "City"
-//        let zipCode = checkedAddress.ZipCode |> ZipCode.create "ZipCode"
-//        let address: Address = {
-//            AddressLine1 = addressLine1
-//            AddressLine2 = Some(addressLine2)
-//            AddressLine3 = Some(addressLine3)
-//            AddressLine4 = Some(addressLine4)
-//            City = city
-//            ZipCode = zipCode
-//        }
-//        return address
-//    }
-//    failwith "Undefined"
-
-//    let (CheckedAddress checkedAddress) = checkedAddress
-//    
-//    let addressLine1 = checkedAddress.AddressLine1 |> String50.create "AddressLine1"
-//    let addressLine2 = checkedAddress.AddressLine2 |> String50.create "AddressLine2"
-//    let addressLine3 = checkedAddress.AddressLine3 |> String50.create "AddressLine3"
-//    let addressLine4 = checkedAddress.AddressLine4 |> String50.create "AddressLine4"
-//    let city = checkedAddress.City |> String50.create "City"
-//    let zipCode = checkedAddress.ZipCode |> ZipCode.create "ZipCode"
-//    
-//    let address: Address = {
-//        AddressLine1 = addressLine1
-//        AddressLine2 = Some(addressLine2)
-//        AddressLine3 = Some(addressLine3)
-//        AddressLine4 = Some(addressLine4)
-//        City = city
-//        ZipCode = zipCode
-//    }
-//    address
-
 let toProductCode (checkProductCodeExists: CheckProductCodeExists) productCode =
     if checkProductCodeExists productCode then
         Ok productCode
@@ -181,21 +146,23 @@ let toValidatedOrderLine checkProductCodeExists (unvalidatedOrderLine: Unvalidat
         return validatedOrderLine
     }
 
-let validateOrder =
-    fun checkProductCodeExists checkAddressExists (unvalidatedOrder: UnvalidatedOrder) ->
+let validateOrder : ValidateOrder =
+    fun checkProductCodeExists checkAddressExists unvalidatedOrder ->
         result {
             let! orderId = unvalidatedOrder.OrderId |> OrderId.create |> Result.mapError ValidationError
             let! customerInfo = unvalidatedOrder.CustomerInfo |> toCustomerInfo
-            let! shippingAddress =
-                unvalidatedOrder.ShippingAddress
-                |> checkAddressExists
-                |> toAddress
-            let! billingAddress =
-                unvalidatedOrder.BillingAddress
-                |> checkAddressExists
-                |> toAddress
             
-            let orderLines = unvalidatedOrder.OrderLines |> List.map (toValidatedOrderLine checkProductCodeExists)
+            let! checkedShippingAddress = unvalidatedOrder.ShippingAddress |> toCheckedAddress checkAddressExists
+            let! shippingAddress = checkedShippingAddress |> toAddress
+            
+            let! checkedBillingAddress = unvalidatedOrder.BillingAddress |> toCheckedAddress checkAddressExists
+            let! billingAddress = checkedBillingAddress |> toAddress
+            
+            let! orderLines =
+                unvalidatedOrder.OrderLines
+                |> List.map (toValidatedOrderLine checkProductCodeExists)
+                |> Result.sequence
+                
             let validatedOrder = {
                 OrderId = orderId
                 CustomerInfo = customerInfo

@@ -111,3 +111,6 @@ type Order =
     | Unvalidated of UnvalidatedOrder
     | Validated of ValidatedOrder
     | Priced of PricedOrder
+    
+// тоже прилетело не пойми откуда
+type CheckedAddress = CheckedAddress of UnvalidatedAddress
