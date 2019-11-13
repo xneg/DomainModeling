@@ -2,7 +2,7 @@ module DomainModeling.Domain.PlaceOrderWorkflow
 
 open DomainModeling.Domain.Result
 open DomainModeling.Domain.Api
-open DomainModeling.Domain.PlaceOrderWorkflow.Steps
+open DomainModeling.Domain.PlaceOrderWorkflowSteps
 
 //let checkOrderExists: CheckProductCodeExists = failwith "Not implemented"
 //let checkAddressExists: CheckAddressExists = failwith "Not implemented"

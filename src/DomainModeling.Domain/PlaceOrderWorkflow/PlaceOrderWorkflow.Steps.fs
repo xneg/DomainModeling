@@ -1,4 +1,4 @@
-module internal DomainModeling.Domain.PlaceOrderWorkflow.Steps
+module internal DomainModeling.Domain.PlaceOrderWorkflowSteps
 
 open DomainModeling.Domain.Api
 open DomainModeling.Domain.Primitives

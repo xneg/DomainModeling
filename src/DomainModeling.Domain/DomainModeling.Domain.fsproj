@@ -3,7 +3,12 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
     </PropertyGroup>
-
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DefineConstants>TRACE</DefineConstants>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <OtherFlags>--sig:test.fsi</OtherFlags>
+    </PropertyGroup>
+    
     <ItemGroup>
         <Compile Include="Utils.fs" />
         <Compile Include="Result.fs" />
